@@ -166,7 +166,8 @@ bool SimpleEQAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SimpleEQAudioProcessor::createEditor()
 {
-    return new SimpleEQAudioProcessorEditor (*this);
+    //return new SimpleEQAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -182,6 +183,67 @@ void SimpleEQAudioProcessor::setStateInformation (const void* data, int sizeInBy
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 }
+
+//==============================================================================
+
+juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::createParameterLayout() 
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    //juce::NormalisableRange<float> lowCutRange(20.f, 20000.f, 1.f, 1.f);
+    //std::make_unique<juce::AudioParameterFloat> lowCutParameters("LowCut Freq", "LowCut Freq", lowCutRange, 20.f);
+    //layout.add(lowCutParameters);
+
+    //low cut
+    layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq", //id
+                                                           "LowCut Freq", //label  
+                                                           juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),//range
+                                                           20.f));//default
+    //high cut
+    layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Freq", //id
+                                                           "HighCut Freq", //label  
+                                                           juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),//range
+                                                           20000.f));//default
+    //peak freq
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Freq", //id
+                                                           "Peak Freq", //label  
+                                                           juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),//range
+                                                           750.f));//default
+    //peak gain
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Gain", //id
+                                                           "Peak Gain", //label  
+                                                           juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f),//range
+                                                           0.0f));//default
+    //peak quality (how wide)
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Quality", //id
+                                                           "Peak Quality", //label  
+                                                           juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f),//range
+                                                           1.f));//default
+    juce::StringArray stringArray;
+    for (int i = 0; i < 4; i++)
+    {
+        juce::String str;
+        str << (12 + 12 * i); // 12, 24, 36, 48
+        str << "db/Oct";
+        stringArray.add(str);
+    }
+
+    //low cut slope
+    layout.add(std::make_unique < juce::AudioParameterChoice>("Low Cut Slope",  //id
+                                                              "Low Cut Slope",  //label  
+                                                              stringArray,      //choices
+                                                              0));              //default
+    //high cut slope
+    layout.add(std::make_unique < juce::AudioParameterChoice>("High Cut Slope", //id
+                                                              "High Cut Slope", //label  
+                                                              stringArray,      //choices
+                                                              0));              //default
+
+    return layout;
+
+
+};
+
 
 //==============================================================================
 // This creates new instances of the plugin..
